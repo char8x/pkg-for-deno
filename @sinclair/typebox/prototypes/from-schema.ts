@@ -26,7 +26,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-import * as Type from '@sinclair/typebox'
+import * as Type from 'npm:@sinclair/typebox'
 
 // ------------------------------------------------------------------
 // Schematics
@@ -69,10 +69,10 @@ type SNull = Readonly<{ type: 'null' }>
 // prettier-ignore
 type TFromRest<T extends readonly unknown[], Acc extends Type.TSchema[] = []> = (
   T extends readonly [infer L extends unknown, ...infer R extends unknown[]]
-    ? TFromSchema<L> extends infer S extends Type.TSchema
-      ? TFromRest<R, [...Acc, S]>
-      : TFromRest<R, [...Acc]>
-    : Acc
+  ? TFromSchema<L> extends infer S extends Type.TSchema
+  ? TFromRest<R, [...Acc, S]>
+  : TFromRest<R, [...Acc]>
+  : Acc
 )
 function FromRest<T extends readonly unknown[]>(T: T): TFromRest<T> {
   return T.map((L) => FromSchema(L)) as never
@@ -83,8 +83,8 @@ function FromRest<T extends readonly unknown[]>(T: T): TFromRest<T> {
 // prettier-ignore
 type TFromEnumRest<T extends readonly SValue[], Acc extends Type.TSchema[] = []> = (
   T extends readonly [infer L extends SValue, ...infer R extends SValue[]]
-    ? TFromEnumRest<R, [...Acc, Type.TLiteral<L>]>
-    : Acc
+  ? TFromEnumRest<R, [...Acc, Type.TLiteral<L>]>
+  : Acc
 )
 function FromEnumRest<T extends readonly SValue[]>(T: T): TFromEnumRest<T> {
   return T.map((L) => Type.Literal(L)) as never
@@ -95,8 +95,8 @@ function FromEnumRest<T extends readonly SValue[]>(T: T): TFromEnumRest<T> {
 // prettier-ignore
 type TFromAllOf<T extends SAllOf> = (
   TFromRest<T['allOf']> extends infer Rest extends Type.TSchema[]
-    ? Type.TIntersectEvaluated<Rest>
-    : Type.TNever
+  ? Type.TIntersectEvaluated<Rest>
+  : Type.TNever
 )
 function FromAllOf<T extends SAllOf>(T: T): TFromAllOf<T> {
   return Type.IntersectEvaluated(FromRest(T.allOf), T)
@@ -107,8 +107,8 @@ function FromAllOf<T extends SAllOf>(T: T): TFromAllOf<T> {
 // prettier-ignore
 type TFromAnyOf<T extends SAnyOf> = (
   TFromRest<T['anyOf']> extends infer Rest extends Type.TSchema[]
-    ? Type.TUnionEvaluated<Rest>
-    : Type.TNever
+  ? Type.TUnionEvaluated<Rest>
+  : Type.TNever
 )
 function FromAnyOf<T extends SAnyOf>(T: T): TFromAnyOf<T> {
   return Type.UnionEvaluated(FromRest(T.anyOf), T)
@@ -119,8 +119,8 @@ function FromAnyOf<T extends SAnyOf>(T: T): TFromAnyOf<T> {
 // prettier-ignore
 type TFromOneOf<T extends SOneOf> = (
   TFromRest<T['oneOf']> extends infer Rest extends Type.TSchema[]
-    ? Type.TUnionEvaluated<Rest>
-    : Type.TNever
+  ? Type.TUnionEvaluated<Rest>
+  : Type.TNever
 )
 function FromOneOf<T extends SOneOf>(T: T): TFromOneOf<T> {
   return Type.UnionEvaluated(FromRest(T.oneOf), T)
@@ -131,8 +131,8 @@ function FromOneOf<T extends SOneOf>(T: T): TFromOneOf<T> {
 // prettier-ignore
 type TFromEnum<T extends SEnum> = (
   TFromEnumRest<T['enum']> extends infer Elements extends Type.TSchema[]
-    ? Type.TUnionEvaluated<Elements>
-    : Type.TNever
+  ? Type.TUnionEvaluated<Elements>
+  : Type.TNever
 )
 function FromEnum<T extends SEnum>(T: T): TFromEnum<T> {
   return Type.UnionEvaluated(FromEnumRest(T.enum))
@@ -143,8 +143,8 @@ function FromEnum<T extends SEnum>(T: T): TFromEnum<T> {
 // prettier-ignore
 type TFromTuple<T extends STuple> = (
   TFromRest<T['items']> extends infer Elements extends Type.TSchema[]
-    ? Type.TTuple<Elements>
-    : Type.TTuple<[]>
+  ? Type.TTuple<Elements>
+  : Type.TTuple<[]>
 )
 // prettier-ignore
 function FromTuple<T extends STuple>(T: T): TFromTuple<T> {
@@ -156,8 +156,8 @@ function FromTuple<T extends STuple>(T: T): TFromTuple<T> {
 // prettier-ignore
 type TFromArray<T extends SArray> = (
   TFromSchema<T['items']> extends infer Items extends Type.TSchema
-    ? Type.TArray<Items>
-    : Type.TArray<Type.TUnknown>
+  ? Type.TArray<Items>
+  : Type.TArray<Type.TUnknown>
 )
 // prettier-ignore
 function FromArray<T extends SArray>(T: T): TFromArray<T> {
@@ -180,14 +180,14 @@ type TFromPropertiesIsOptional<K extends PropertyKey, R extends string | unknown
 // prettier-ignore
 type TFromProperties<T extends SProperties, R extends string | unknown> = Type.Evaluate<{
   -readonly [K in keyof T]: TFromPropertiesIsOptional<K, R> extends true
-    ? Type.TOptional<TFromSchema<T[K]>>
-    : TFromSchema<T[K]>
+  ? Type.TOptional<TFromSchema<T[K]>>
+  : TFromSchema<T[K]>
 }>
 // prettier-ignore
 type TFromObject<T extends SObject> = (
   TFromProperties<T['properties'], Exclude<T['required'], undefined>[number]> extends infer Properties extends Type.TProperties
-    ? Type.TObject<Properties>
-    : Type.TObject<{}>
+  ? Type.TObject<Properties>
+  : Type.TObject<{}>
 )
 function FromObject<T extends SObject>(T: T): TFromObject<T> {
   const properties = globalThis.Object.getOwnPropertyNames(T.properties).reduce((Acc, K) => {
@@ -220,18 +220,18 @@ export function FromSchema<T>(T: T): TFromSchema<T> {
   // prettier-ignore
   return (
     IsSAllOf(T) ? FromAllOf(T) :
-    IsSAnyOf(T) ? FromAnyOf(T) :
-    IsSOneOf(T) ? FromOneOf(T) :
-    IsSEnum(T) ? FromEnum(T) :
-    IsSObject(T) ? FromObject(T) :
-    IsSTuple(T) ? FromTuple(T) :
-    IsSArray(T) ? FromArray(T) :
-    IsSConst(T) ? FromConst(T) :
-    IsSString(T) ? Type.String(T) :
-    IsSNumber(T) ? Type.Number(T) :
-    IsSInteger(T) ? Type.Integer(T) :
-    IsSBoolean(T) ? Type.Boolean(T) :
-    IsSNull(T) ? Type.Null(T) :
-    Type.Unknown(T || {})
+      IsSAnyOf(T) ? FromAnyOf(T) :
+        IsSOneOf(T) ? FromOneOf(T) :
+          IsSEnum(T) ? FromEnum(T) :
+            IsSObject(T) ? FromObject(T) :
+              IsSTuple(T) ? FromTuple(T) :
+                IsSArray(T) ? FromArray(T) :
+                  IsSConst(T) ? FromConst(T) :
+                    IsSString(T) ? Type.String(T) :
+                      IsSNumber(T) ? Type.Number(T) :
+                        IsSInteger(T) ? Type.Integer(T) :
+                          IsSBoolean(T) ? Type.Boolean(T) :
+                            IsSNull(T) ? Type.Null(T) :
+                              Type.Unknown(T || {})
   ) as never
 }
